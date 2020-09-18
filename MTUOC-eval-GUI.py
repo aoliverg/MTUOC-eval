@@ -163,7 +163,7 @@ def copy_results():
     main_window.clipboard_append(results_frame_text.get("1.0",END))
     
 def calculate():
-    
+    results_frame_text.delete('1.0', END)
     doBLEU=True
     doNIST=True
     doWER=True
