@@ -160,6 +160,7 @@ def open_hypothesis():
     return
 
 def copy_results():
+    main_window.clipboard_clear()  
     main_window.clipboard_append(results_frame_text.get("1.0",END))
     
 def calculate():
