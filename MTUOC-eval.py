@@ -149,11 +149,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     
-    stream = open('config.yaml', 'r',encoding="utf-8")
-    config=yaml.load(stream,Loader=Loader)
-    filepathin=config['Filepath']['path_in']
-    tokenizerlist=config['Tokenizers']['list']
-    defaultokenizer=config['Tokenizers']['default']
+    #stream = open('config.yaml', 'r',encoding="utf-8")
+    #config=yaml.load(stream,Loader=Loader)
+    #filepathin=config['Filepath']['path_in']
+    #tokenizerlist=config['Tokenizers']['list']
+    #defaultokenizer=config['Tokenizers']['default']
 
     #############
     #ROUND VALUES:
