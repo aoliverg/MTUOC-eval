@@ -7,7 +7,7 @@ Round:
   rter: 4
 #For GUI version:
 Filepath:
-  path_in: /home/aoliverg/MTUOC-distribucio/MTUOC-00-generic-MTSPGA-eng-spa/evaluation
+  path_in: /home/aoliverg/MTUOC-distribucio/CPSL-WOLF-MTSPGA-deu-ita/evaluation
 Tokenizers:
   list: ["MTUOC_tokenizer_arg", "MTUOC_tokenizer_ast", "MTUOC_tokenizer_cat", "MTUOC_tokenizer_deu", "MTUOC_tokenizer_eng", "MTUOC_tokenizer_fra", "MTUOC_tokenizer_gal", "MTUOC_tokenizer_gen", "MTUOC_tokenizer_ita", "MTUOC_tokenizer_por", "MTUOC_tokenizer_rus", "MTUOC_tokenizer_spa", "MTUOC_tokenizer_zho_jieba", "MTUOC_tokenizer_zho_pseudo"]
   default: MTUOC_tokenizer_gen
