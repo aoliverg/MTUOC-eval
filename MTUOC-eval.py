@@ -148,21 +148,14 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    
-    #stream = open('config.yaml', 'r',encoding="utf-8")
-    #config=yaml.load(stream,Loader=Loader)
-    #filepathin=config['Filepath']['path_in']
-    #tokenizerlist=config['Tokenizers']['list']
-    #defaultokenizer=config['Tokenizers']['default']
-
     #############
-    #ROUND VALUES:
-    rbleu=int(config['Round']['rbleu'])
-    rnist=int(config['Round']['rnist'])
-    rwer=int(config['Round']['rwer'])
-    red=int(config['Round']['red'])
-    rter=int(config['Round']['rter'])
-#############
+    #ROUND VALUES: edit these lines if you want to use different values
+    rbleu= 4
+    rnist= 3
+    rwer= 4
+    red= 2
+    rter= 4
+    #############
 
     rfile=codecs.open(args.refs,"r",encoding="utf-8")
     hfile=codecs.open(args.hyp,"r",encoding="utf-8")
