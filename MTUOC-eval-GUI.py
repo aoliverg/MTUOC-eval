@@ -208,7 +208,6 @@ def calculate():
         hypothesis.append(linia)
         hypothesis_tok.append(tokens)
         
-        
     if doBLEU:
         try:
             BLEU=corpus_bleu(references_tok,hypothesis_tok)
@@ -282,6 +281,9 @@ def calculate():
             cadena="TER:  Unable to calcualte TER"
             results_frame_text.insert(INSERT, cadena)
             results_frame_text.insert(INSERT, "\n")
+            
+    rfile.close()
+    hfile.close()
 
 stream = open('config.yaml', 'r',encoding="utf-8")
 config=yaml.load(stream,Loader=Loader)

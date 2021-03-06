@@ -1,5 +1,4 @@
-#    MTUOC_tokenizer_zho_jieba
-#    This is a tokenization-detokenization process for Chinese using the Jieba library.
+#    MTUOC_tokenizer_zho_jieba 3.1
 #    Copyright (C) 2020  Antoni Oliver
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -15,92 +14,148 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pyonmttok
+import string
+import re
 import sys
+import os
 import html
 import jieba
-import os
 
-
-jieba.initialize() 
-current_dir=os.path.dirname(os.path.realpath(__file__))
-fulldicname=os.path.join(current_dir,'dict.txt.big')
+#' &#39;
+#" &#34;
+#- &#45;
+#< &#60;
+#> &#62;
+#= &#61;
+#space &#32;
+#/ &#47;
+#{ &#123;
+#} &#125;
 
 subs=[]
-sorted_subs = sorted(subs, key=len, reverse=True)
-subs=sorted_subs
 
-def protect(segment):
-    segmentList=segment.split(" ")
-    segment2List=segment.split(" ")
-    for i in range(0,len(segment2List)):
-        for sub in subs:
-            sub=sub.replace("￭","")
-            replace="｟"+sub+"｠"
-            replaceUC="｟"+sub.upper()+"｠"
-            replaceCAP="｟"+sub.capitalize()+"｠"
-            if segment2List[i].find(sub)>-1:
-                segment2List[i]=segment2List[i].replace(sub,"")
-                segmentList[i]=segmentList[i].replace(sub,replace)
-            if segment2List[i].find(sub.upper())>-1:
-                segment2List[i]=segment2List[i].replace(sub.upper(),"")
-                segmentList[i]=segmentList[i].replace(sub.upper(),replaceUC)
-            if segment2List[i].find(sub.upper())>-1:
-                segment2List[i]=segment2List[i].replace(sub.upper(),"")
-                segmentList[i]=segmentList[i].replace(sub.upper(),replaceUC)
-            if segment2List[i].find(sub.capitalize())>-1:
-                segment2List[i]=segment2List[i].replace(sub.capitalize(),"")
-                segmentList[i]=segmentList[i].replace(sub.capitalize(),replaceCAP)
-    segment=" ".join(segmentList)
+re_num = re.compile(r'[\d\,\.]+')
+
+def split_numbers(segment):
+    xifres = re.findall(re_num,segment)
+    for xifra in xifres:
+        xifrastr=str(xifra)
+        xifrasplit=xifra.split()
+        xifra2="￭ ".join(xifra)
+        segment=segment.replace(xifra,xifra2)
     return(segment)
-    
-def unprotect(segment):
-    segment=segment.replace("｟","")
-    segment=segment.replace("｠","")
-    return(segment)
+
+
+
+def protect_tags(segment):
+    tags=re.findall(r'<[^>]+>',segment)
+    for tag in tags:
+        ep=False
+        ef=False
+        if segment.find(" "+tag)==-1:ep=True
+        if segment.find(tag+" ")==-1:ef=True
+        tagmod=tag.replace("<","&#60;").replace(">","&#62;").replace("=","&#61;").replace("'","&#39;").replace('"',"&#34;").replace("/","&#47;").replace(" ","&#32;")
+        if ep: tagmod=" ￭"+tagmod
+        if ef: tagmod=tagmod+"￭ "
+        segment=segment.replace(tag,tagmod)
+    tags=re.findall(r'\{[0-9]+\}',segment)
+    for tag in tags:
+        ep=False
+        ef=False
+        if segment.find(" "+tag)==-1:ep=True
+        if segment.find(tag+" ")==-1:ef=True
+        tagmod=tag.replace("{","&#123;").replace("}","&#125;")
+        if ep: tagmod=" ￭"+tagmod
+        if ef: tagmod=tagmod+"￭ "
+        segment=segment.replace(tag,tagmod)
+    return(segment) 
+
+def unprotect(cadena):
+    cadena=cadena.replace("&#39;","'").replace("&#45;","-").replace("&#60;","<").replace("&#62;",">").replace("&#34;",'"').replace("&#61;","=").replace("&#32;","▁").replace("&#47;","/").replace("&#123;","{").replace("&#125;","}")
+    return(cadena)
 
 def tokenize(segment):
     seg_list = jieba.cut(segment, cut_all=False)
     tokenized = " ".join(list(seg_list))
     return(tokenized)
-
-def tokenize_m(segment):
-    tokenizer = pyonmttok.Tokenizer("space", segment_numbers=False, joiner_annotate=True)
-    seg_list = jieba.cut(segment, cut_all=False)
-    tokenized = " ￭".join(list(seg_list))
-    return(tokenized) 
-    
-def tokenize_mn(segment):
-    tokenizer = pyonmttok.Tokenizer("aggressive", segment_numbers=True, joiner_annotate=False)
-    seg_list = jieba.cut(segment, cut_all=False)
-    tokenized = " ".join(list(seg_list))
-    tokens, features = tokenizer.tokenize(tokenized)
-    tokenized=" ￭".join(tokens)       
-    return(tokenized) 
     
 def detokenize(segment):
     desegment=segment.replace(" ","")
     return(desegment)
 
-def detokenize_m(segment):
-    tokenizer = pyonmttok.Tokenizer("aggressive", segment_numbers=False, joiner_annotate=False)
-    segment=tokenizer.detokenize(segment.split(" "))
-    for sub in subs:
-        sub1=sub.replace("￭"," ")
-        sub2=sub.replace("￭","")
-        segment=segment.replace(sub1,sub2)
+def tokenize_j(segment):
+    seg_list = jieba.cut(segment, cut_all=False)
+    tokenized = " ￭".join(list(seg_list))
+    return(tokenized) 
+
+def detokenize_j(segment):
+    segment=segment.replace(" ￭","")
+    segment=segment.replace("￭ ","")
+    segment=segment.replace("￭","")
     detok=segment
     return(detok)
     
-def detokenize_mn(segment):
-    tokenizer = pyonmttok.Tokenizer("aggressive", segment_numbers=True, joiner_annotate=False)
-    segment=tokenizer.detokenize(segment.split(" "))
+def tokenize_jn(segment):
+    seg_list = jieba.cut(segment, cut_all=False)
+    tokenized = " ￭".join(list(seg_list))
+    tokenized=split_numbers(tokenized)
+    return(tokenized)
+
+def detokenize_jn(segment):
+    segment=detokenize_j(segment)
+    return(segment)
+    
+def tokenize_s(segment):
+    seg_list = jieba.cut(segment, cut_all=False)
+    tokenized = " ￭".join(list(seg_list))
+    tokenized=tokenized.replace("￭ ","￭")
+    tokenized=tokenized.replace(" ￭","￭")
+    tokenized=tokenized.replace(" "," ▁")
+    tokenized=tokenized.replace("￭"," ")
+    return(tokenized)
+    
+def detokenize_s(segment):
+    segment=segment.replace(" ","")
+    segment=segment.replace("▁"," ")
     detok=segment
     return(detok)
+
+def tokenize_sn(segment):
+    seg_list = jieba.cut(segment, cut_all=False)
+    tokenized = " ￭".join(list(seg_list))
+    tokenized=split_numbers(tokenized)
+    tokenized=tokenized.replace("￭ ","￭")
+    tokenized=tokenized.replace(" ￭","￭")
+    tokenized=tokenized.replace(" "," ▁")
+    tokenized=tokenized.replace("￭"," ")
+    return(tokenized)
+
+def detokenize_sn(segment):
+    segment=detokenize_s(segment)
+    return(segment)
+    
+def print_help():
+    print("MTUOC_tokenizer_zho_jieba.py A tokenizer for Chinese (using jieba), usage:")
+    print("Simple tokenization:")
+    print('    cat "sentence to tokenize." | python3 MTUOC_tokenizer_zho_jieba.py tokenize')
+    print('    python3 MTUOC_tokenizer_zho_jieba.py tokenize < file_to_tokenize > tokenized_file')
+    print()
+    print("Simple detokenization:")
+    print('    cat "sentence to tokenize." | python3 MTUOC_tokenizer_zho_jieba.py detokenize')
+    print('    python3 MTUOC_tokenizer_zho_jieba.py detokenize < file_to_detokenize > detokenized_file')
+    print()
+    print("Advanced options:")
+    print("    tokenization/detokenization with joiner marks (￭): tokenize_j / detokenize_j")
+    print("    tokenization/detokenization with joiner marks (￭) and number splitting: tokenize_jn / detokenize_jn")
+    print("    tokenization/detokenization with splitter marks (▁): tokenize_s / detokenize_s")
+    print("    tokenization/detokenization with splitter marks (▁) and number splitting: tokenize_sn / detokenize_sn")
         
 
 if __name__ == "__main__":
     if len(sys.argv)>1:
+        if sys.argv[1]=="-h" or sys.argv[1]=="--help":
+            print_help()
+            sys.exit()
         action=sys.argv[1]
     else:
         action="tokenize"
@@ -111,15 +166,25 @@ if __name__ == "__main__":
         line=html.unescape(line)
         if action=="tokenize":
             outsegment=tokenize(line)
-        elif action=="tokenize_m":
-            outsegment=tokenize_m(line)
-        elif action=="tokenize_mn":
-            outsegment=tokenize_mn(line)
         elif action=="detokenize":
             outsegment=detokenize(line)
-        elif action=="detokenize_m":
-            outsegment=detokenize_m(line)
-        elif action=="detokenize_mn":
-            outsegment=detokenize_mn(line)
-        print(outsegment)
         
+        elif action=="tokenize_s":
+            outsegment=tokenize_s(line)
+        elif action=="detokenize_s":
+            outsegment=detokenize_s(line)
+        elif action=="tokenize_sn":
+            outsegment=tokenize_sn(line)
+        elif action=="detokenize_sn":
+            outsegment=detokenize_sn(line)
+        
+        elif action=="tokenize_j":
+            outsegment=tokenize_j(line)
+        elif action=="detokenize_j":
+            outsegment=detokenize_j(line)
+        elif action=="tokenize_jn":
+            outsegment=tokenize_jn(line)
+        elif action=="detokenize_jn":
+            outsegment=detokenize_jn(line)
+        
+        print(outsegment)
