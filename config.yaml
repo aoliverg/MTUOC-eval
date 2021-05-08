@@ -1,4 +1,11 @@
 #For terminal and GUI versions:
+Measure:
+  bleu: True
+  nist: True
+  wer: True
+  ed: True
+  ter: True
+#one of True, False
 Round:
   rbleu: 4
   rnist: 3

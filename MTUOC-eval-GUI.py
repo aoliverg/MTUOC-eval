@@ -165,11 +165,7 @@ def copy_results():
     
 def calculate():
     results_frame_text.delete('1.0', END)
-    doBLEU=True
-    doNIST=True
-    doWER=True
-    doED=True
-    doTER=True
+
     
     rfilename=F_frame_E_Ref.get()
     hfilename=F_frame_E_Hyp.get()
@@ -290,6 +286,18 @@ config=yaml.load(stream,Loader=Loader)
 filepathin=config['Filepath']['path_in']
 tokenizerlist=config['Tokenizers']['list']
 defaultokenizer=config['Tokenizers']['default']
+
+
+#############
+#MEASURES:
+
+doBLEU=config['Measure']['bleu']
+doNIST=config['Measure']['nist']
+doWER=config['Measure']['wer']
+doED=config['Measure']['ed']
+doTER=config['Measure']['ter']
+#############
+
 
 #############
 #ROUND VALUES:

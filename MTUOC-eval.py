@@ -148,13 +148,31 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    stream = open('config.yaml', 'r',encoding="utf-8")
+    config=yaml.load(stream,Loader=Loader)
+    filepathin=config['Filepath']['path_in']
+    tokenizerlist=config['Tokenizers']['list']
+    defaultokenizer=config['Tokenizers']['default']
+
+
     #############
-    #ROUND VALUES: edit these lines if you want to use different values
-    rbleu= 4
-    rnist= 3
-    rwer= 4
-    red= 2
-    rter= 4
+    #MEASURES:
+
+    doBLEU=config['Measure']['bleu']
+    doNIST=config['Measure']['nist']
+    doWER=config['Measure']['wer']
+    doED=config['Measure']['ed']
+    doTER=config['Measure']['ter']
+    #############
+
+
+    #############
+    #ROUND VALUES:
+    rbleu=int(config['Round']['rbleu'])
+    rnist=int(config['Round']['rnist'])
+    rwer=int(config['Round']['rwer'])
+    red=int(config['Round']['red'])
+    rter=int(config['Round']['rter'])
     #############
 
     rfile=codecs.open(args.refs,"r",encoding="utf-8")
@@ -190,12 +208,7 @@ if __name__ == "__main__":
         hypothesis.append(linia)
         hypothesis_tok.append(tokens)
 
-    doBLEU=False
-    doNIST=False
-    doWER=False
-    doED=False
-    doTER=False
-    
+ 
 
     if args.mbleu: doBLEU=True
     if args.mnist: doNIST=True
@@ -203,13 +216,6 @@ if __name__ == "__main__":
     if args.ed: doED=True
     if args.mter: doTER=True
     
-    if not args.mbleu and not args.mnist and not args.mwer and not args.ed and not args.mter:# and not args.mpyter:
-        doBLEU=True
-        doNIST=True
-        doWER=True
-        doED=True
-        doTER=True
-
     if doBLEU:
         try:
             BLEU=corpus_bleu(references_tok,hypothesis_tok)
