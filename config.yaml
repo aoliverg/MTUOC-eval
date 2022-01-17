@@ -1,0 +1,23 @@
+#For terminal and GUI versions:
+Measure:
+  bleu: True
+  nist: True
+  wer: True
+  ed: True
+  ter: True
+#one of True, False
+Round:
+  rbleu: 4
+  rnist: 3
+  rwer: 4
+  red: 2
+  rter: 4
+#reference selection measure
+#one of bleu, nist, wer, ed, ter
+#For GUI version:
+Filepath:
+  path_in: .
+Tokenizers:
+  list: ["MTUOC_tokenizer_arg", "MTUOC_tokenizer_ast", "MTUOC_tokenizer_cat", "MTUOC_tokenizer_deu", "MTUOC_tokenizer_eng", "MTUOC_tokenizer_fra", "MTUOC_tokenizer_gal", "MTUOC_tokenizer_gen", "MTUOC_tokenizer_ita", "MTUOC_tokenizer_por", "MTUOC_tokenizer_rus", "MTUOC_tokenizer_spa", "MTUOC_tokenizer_zho_jieba", "MTUOC_tokenizer_zho_pseudo"]
+  default: MTUOC_tokenizer_gen
+
