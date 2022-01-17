@@ -4,4 +4,4 @@ An easy-to-use program for machine translation evaluation using automatic metric
 
 Windows version available at: 
 
-Full document
+Full documentation in the wiki: https://github.com/aoliverg/MTUOC-eval/wiki
