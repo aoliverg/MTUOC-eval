@@ -3,5 +3,6 @@
 An easy-to-use program for machine translation evaluation using automatic metrics.
 
 Windows version available at: http://lpg.uoc.edu/MTUOC/MTUOC-eval-2.0-win.zip
+(copy the link above and paste in your browser)
 
 Full documentation in the wiki: https://github.com/aoliverg/MTUOC-eval/wiki
