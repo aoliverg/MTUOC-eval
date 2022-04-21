@@ -602,7 +602,7 @@ F_frame_E_Hyp = Entry(F_frame,  width=50)
 F_frame_E_Hyp.grid(row=1,column=1)
 F_frame_L_tokenizers = Label(F_frame,text="T.L. tokenizer:").grid(sticky="W",row=3,column=0)
 
-combo_tokenizersF = ttk.Combobox(F_frame,state="readonly",values=tokenizerlist)
+combo_tokenizersF = ttk.Combobox(F_frame,state="readonly",values=tokenizerlist,width=30)
 combo_tokenizersF.grid(sticky="W",row=3,column=1)
 position=tokenizerlist.index(defaultokenizer)
 combo_tokenizersF.current(position)
