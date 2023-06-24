@@ -299,15 +299,7 @@ if __name__ == "__main__":
         doCHRF=True
         doCOMET=True
         
-    sourcesegments=[]
-    if args.source:
-        sourcef=codecs.open(args.source,"r",encoding="utf-8")
-        for linia in sourcef:
-            linia=linia.rstrip()
-            sourcesegments.append(linia)
-    else:
-        for i in range(0,contref):
-            sourcesegments.append("") 
+    
             
     if doCOMET:
         try:
@@ -356,6 +348,16 @@ if __name__ == "__main__":
         hypothesis.append(linia)
         hypothesis_tok.append(tokens)
         conthyp+=1
+        
+    sourcesegments=[]
+    if args.source:
+        sourcef=codecs.open(args.source,"r",encoding="utf-8")
+        for linia in sourcef:
+            linia=linia.rstrip()
+            sourcesegments.append(linia)
+    else:
+        for i in range(0,contref):
+            sourcesegments.append("") 
         
     if not contref==conthyp:
         print("ERROR: number of references and hypotheses not equal.")
