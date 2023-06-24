@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #    MTUOC-eval-lite
-#    Copyright (C) 2022  Antoni Oliver
+#    Copyright (C) 2023  Antoni Oliver
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@ import codecs
 from nltk.translate.bleu_score import corpus_bleu
 from nltk.translate.nist_score import corpus_nist
 from nltk.translate.nist_score import sentence_nist
+from nltk.translate.chrf_score import corpus_chrf
+from nltk.translate.chrf_score import sentence_chrf
 
 from nltk.metrics import edit_distance
 
@@ -199,7 +201,22 @@ def wer_corpus(references,hypothesis):
     wer=weracu/cont
     return(wer)
     
-
+def comet_corpus(sourcesegments,references,hypothesis,model="wmt22-comet-da",gpus=1):
+    model_path = download_model(model)
+    model = load_from_checkpoint(model_path)
+    ls=len(sourcesegments)
+    lr=len(references)
+    lh=len(hypothesis)
+    data=[]
+    for i in range(0,ls):
+        dataaux={}
+        dataaux["src"]=sourcesegments[i]
+        dataaux["mt"]=hypothesis[i]
+        dataaux["ref"]=references[i][0]
+        data.append(dataaux)
+    seg_scores, sys_score = model.predict(data, batch_size=8, gpus=gpus)
+    return(seg_scores, sys_score)
+    
 
     
 
@@ -217,9 +234,10 @@ if __name__ == "__main__":
     parser.add_argument('--WER', action='store_true', default=False, dest='mwer',help='Calculate WER.')
     parser.add_argument('--ED', action='store_true', default=False, dest='med',help='Calculate Edit Distant percent.')
     parser.add_argument('--TER', action='store_true', default=False, dest='mter',help='Calculate TER (using termcom).')
+    parser.add_argument('--CHRF', action='store_true', default=False, dest='mchrf',help='Calculate CHRF (global value).')
     parser.add_argument('--outfile', action='store', default=False, dest='outfile',help='The Excel and tabbed text file with the segment values.')
-    
     parser.add_argument('--source', action='store', default=False, dest='source',help='The file with the source segments (only needed to create the output file).')
+    parser.add_argument('--COMET', action='store_true', default=False, dest='mcomet',help='Calculate COMET (it should be installed in the system).')
     
     try:
         stream = open('config.yaml', 'r',encoding="utf-8")
@@ -234,8 +252,14 @@ if __name__ == "__main__":
         rwer=int(config['Round']['rwer'])
         reddist=int(config['Round']['red'])
         rter=int(config['Round']['rter'])
+        rchrf=int(config['Round']['rchrf'])
+        rcomet=int(config['Round']['rcomet'])
         #############
+        #COMET:
+        comet_model=config['COMET']['model']
+        comet_gpus=int(config['COMET']['gpus'])
     except:
+        print("ERROR loading YAML:",sys.exc_info())
         filepathin="."
         tokenizerlist=["MTUOC_tokenizer_arg", "MTUOC_tokenizer_ast", "MTUOC_tokenizer_cat", "MTUOC_tokenizer_deu", "MTUOC_tokenizer_eng", "MTUOC_tokenizer_fra", "MTUOC_tokenizer_gal", "MTUOC_tokenizer_gen", "MTUOC_tokenizer_ita", "MTUOC_tokenizer_por", "MTUOC_tokenizer_rus", "MTUOC_tokenizer_spa", "MTUOC_tokenizer_zho_jieba", "MTUOC_tokenizer_zho_pseudo"]
         defaultokenizer="MTUOC_tokenizer_gen"  
@@ -246,6 +270,8 @@ if __name__ == "__main__":
         rwer=3
         reddist=3
         rter=3
+        rchrf=3
+        rcomet=3
     
     args = parser.parse_args()
 
@@ -254,20 +280,41 @@ if __name__ == "__main__":
     doWER=False
     doED=False
     doTER=False
+    doCHRF=False
+    doCOMET=False
     if args.mbleu: doBLEU=True
     if args.mnist: doNIST=True
     if args.mwer: doWER=True
     if args.med: doED=True
     if args.mter: doTER=True
+    if args.mchrf: doCHRF=True
+    if args.mcomet: doCOMET=True
 
-    if not args.mbleu and not args.mnist and not args.mwer and not args.med and not args.mter:
+    if not args.mbleu and not args.mnist and not args.mwer and not args.med and not args.mter and not args.mchrf and not args.mcomet:
         doBLEU=True
         doNIST=True
         doWER=True
         doED=True
         doTER=True
-
-    
+        doCHRF=True
+        doCOMET=True
+        
+    sourcesegments=[]
+    if args.source:
+        sourcef=codecs.open(args.source,"r",encoding="utf-8")
+        for linia in sourcef:
+            linia=linia.rstrip()
+            sourcesegments.append(linia)
+    else:
+        for i in range(0,contref):
+            sourcesegments.append("") 
+            
+    if doCOMET:
+        try:
+            from comet import download_model, load_from_checkpoint
+        except:
+            print("COMET not installed. Not calculating COMET.")
+            doCOMET=False
     
     rfile=codecs.open(args.refs,"r",encoding="utf-8")
     hfile=codecs.open(args.hyp,"r",encoding="utf-8")
@@ -360,19 +407,30 @@ if __name__ == "__main__":
             print("TER:      ",round(TERcorpus,rter))
         except:
             print("ERROR: unable to calculate TER",sys.exc_info())
+    
+    if doCHRF:
+        try:
+            CHRF=corpus_chrf(references,hypothesis)
+            print("CHRF:     ",round(CHRF,rchrf))
+        except:
+            print("ERROR: unable to calculate CHFR:",sys.exc_info())
+    
+    if doCOMET:
+        try:
+            COMETdetailed,COMETglobal=comet_corpus(sourcesegments,references,hypothesis,model=comet_model,gpus=comet_gpus)
+            
+        except:
+            doCOMET=False
+            print("ERROR: unable to calculate COMET",sys.exc_info()) 
+            
+    if doCOMET:
+        print("COMET:   :",round(COMETglobal,rcomet))
+        
+    
+            
+    
 
-    if args.outfile:
-    
-        sourcesegments=[]
-        if args.source:
-            sourcef=codecs.open(args.source,"r",encoding="utf-8")
-            for linia in sourcef:
-                linia=linia.rstrip()
-                sourcesegments.append(linia)
-        else:
-            for i in range(0,contref):
-                sourcesegments.append("")
-    
+    if args.outfile:    
         excelfile=args.outfile
         textfile=args.outfile
         if not excelfile.endswith(".xlsx"): excelfile=excelfile.replace(".txt","")+".xlsx"
@@ -407,6 +465,12 @@ if __name__ == "__main__":
         sheetAll.write(5,0,"TER")
         if doTER:
             sheetAll.write(5,1,round(TERcorpus,rter))
+        sheetAll.write(6,0,"CHRF")    
+        if doCHRF: 
+            sheetAll.write(6,1,round(CHRF,rchrf))
+        sheetAll.write(7,0,"COMET")      
+        if doCOMET: 
+            sheetAll.write(7,1,round(COMETglobal,rcomet))
         
         cadenasortida=[]
         cadenasortida.append("IDENT.")
@@ -436,16 +500,27 @@ if __name__ == "__main__":
             cadenasortida.append("WER")
             columnWER=column
             column+=1
-        if doTER: 
-            sheetDetailed.write(0, column, "TER", bold)
-            cadenasortida.append("TER")
-            columnTER=column
-            column+=1
         if doED: 
             sheetDetailed.write(0, column, "EditDistance", bold)
             cadenasortida.append("EditDistance")
             columnED=column
             column+=1
+        if doTER: 
+            sheetDetailed.write(0, column, "TER", bold)
+            cadenasortida.append("TER")
+            columnTER=column
+            column+=1
+        if doCHRF: 
+            sheetDetailed.write(0, column, "CHRF", bold)
+            cadenasortida.append("CHRF")
+            columnCHRF=column
+            column+=1
+        if doCOMET:
+            sheetDetailed.write(0, column, "COMET", bold)
+            cadenasortida.append("COMET")
+            columnCOMET=column
+            column+=1
+        
             
         sortida.write("\t".join(cadenasortida)+"\n")
         for i in range(0,len(hypothesis)):
@@ -455,6 +530,9 @@ if __name__ == "__main__":
             sheetDetailed.write(i+1, 1, sourcesegments[i], text_wrap)
             cadenasortida.append(sourcesegments[i].replace("\t"," "))
             sheetDetailed.write(i+1, 3, hypothesis[i], text_wrap)
+            
+            currentreference=references[i]
+            currenthypothesis=hypothesis[i]
                        
             rtok=[references_tok[i]]
             htok=[hypothesis_tok[i]]
@@ -522,6 +600,23 @@ if __name__ == "__main__":
                 except:
                     cadenasortida.append("")
                     print("ERROR: unable to calculate detailed TER",sys.exc_info())      
+            
+            if doCHRF:
+                try:
+                    CHRFsentence=sentence_chrf(currentreference,currenthypothesis)
+                    sheetDetailed.write(i+1, columnCHRF, round(CHRFsentence,rchrf))
+                    cadenasortida.append(str(round(CHRFsentence,rchrf)))                  
+                except:
+                    cadenasortida.append("")
+                    print("ERROR: unable to calculate detailed CHRF",sys.exc_info()) 
+            
+            if doCOMET:
+                try:
+                    sheetDetailed.write(i+1, columnCOMET, round(COMETdetailed[i],rcomet))
+                    cadenasortida.append(str(round(COMETdetailed[i],rcomet)))                  
+                except:
+                    cadenasortida.append("")
+                    print("ERROR: unable to calculate detailed COMET",sys.exc_info()) 
             
             sortida.write("\t".join(cadenasortida)+"\n")
             
