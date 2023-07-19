@@ -12,6 +12,11 @@ Round:
   rwer: 4
   red: 2
   rter: 4
+  rchrf: 4
+  rcomet: 4
+COMET:
+  model: /home/aoliverg/COMET/wmt22-comet-da/checkpoints/model.ckpt
+  gpus: 1
 #reference selection measure
 #one of bleu, nist, wer, ed, ter
 #For GUI version:
