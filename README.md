@@ -1,5 +1,7 @@
 # MTUOC-eval
 
+Recommended COMET model: [wmt22-comet-da](https://unbabel-experimental-models.s3.amazonaws.com/comet/wmt22/wmt22-comet-da.tar.gz)
+
 An easy-to-use program for machine translation evaluation using automatic metrics.
 
 Windows version available at:
