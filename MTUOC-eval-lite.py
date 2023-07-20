@@ -202,8 +202,8 @@ def wer_corpus(references,hypothesis):
     return(wer)
     
 def comet_corpus(sourcesegments,references,hypothesis,model="wmt22-comet-da",gpus=1):
-    model_path = download_model(model)
-    model = load_from_checkpoint(model_path)
+    #model_path = download_model(model)
+    model = load_from_checkpoint(model)
     ls=len(sourcesegments)
     lr=len(references)
     lh=len(hypothesis)
